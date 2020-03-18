@@ -1,5 +1,6 @@
 package chapter13.BeatBox;
 
+import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -185,5 +186,59 @@ public class BeatBox {
         }
 
         return event;
+    }
+
+    public class MySendListener implements ActionListener {
+        public void actionPerformed (ActionEvent event) {
+            boolean[] checkBoxState = new boolean[256];
+
+            int i = 0;
+            for (JCheckBox check : checkboxList) {
+                if (check.isSelected()) {
+                    checkBoxState[i] = true;
+                }
+                ++i;
+            }
+
+            try {
+                FileOutputStream fileStream = new FileOutputStream(
+                        new File("E:/Java/HeadFirstJava/src/chapter13/BeatBox/Music.ser"));
+                ObjectOutputStream os = new ObjectOutputStream(fileStream);
+                os.writeObject(checkBoxState);
+            } catch (Exception ex) {
+                System.out.println("can't open file");
+                ex.printStackTrace();
+            }
+        }
+    }// 结束内部类
+
+    public class MyReadInListener implements ActionListener {
+        public void actionPerformed (ActionEvent event) {
+            boolean[] checkBoxState = null;
+
+            try {
+                FileInputStream fileStream = new FileInputStream(
+                        new File("E:/Java/HeadFirstJava/src/chapter13/BeatBox/Music.ser"));
+                ObjectInputStream is = new ObjectInputStream(fileStream);
+
+                checkBoxState = (boolean[]) is.readObject();
+            } catch (Exception ex) {
+                System.out.println("can't open the file");
+                ex.printStackTrace();
+            }
+
+            for (int i = 0; i < 256; ++i) {
+                JCheckBox check = (JCheckBox) checkboxList.get(i);
+
+                if (checkBoxState[i]) {
+                    check.setSelected(true);
+                } else {
+                    check.setSelected(false);
+                }
+            }
+
+            sequencer.stop();
+            buildTrackAndStart(); //停止目前播放的节奏并使用复选框状态重新创建序列
+        }
     }
 }
